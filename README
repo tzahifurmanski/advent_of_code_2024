@@ -1,2 +1,5 @@
+A repo of my progress with Advent of Code 2024.
+Author: Tzahi Furmanski (tzahi.fur@gmail.com)
+
 Use TSX to run the scripts.
 For example: `npx tsc day1.ts | node day1.js`
