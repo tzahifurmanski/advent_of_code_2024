@@ -3,12 +3,51 @@
  *
  * Validates reactor safety reports by checking if number sequences
  * are consistently increasing or decreasing, with adjacent values
- * differing by 1-3. Counts total safe reports.
+ * differing by 1-3.
  *
+ * Part 2: Reports are also safe if removing any single element
+ * makes them safe (Problem Dampener tolerance).
  */
 import * as fs from "fs";
 
 const INPUT_FILE = "day2_input.txt";
+
+function isSafe(report: number[]) {
+  if (report.length < 2) {
+    return false;
+  }
+
+  let firstDifference = undefined;
+  for (let index = 0; index < report.length - 1; index += 1) {
+    const difference = report[index + 1] - report[index];
+    if (firstDifference === undefined) {
+      firstDifference = difference;
+    }
+
+    if (firstDifference * difference < 0) {
+      return false;
+    }
+
+    if (Math.abs(difference) < 1 || Math.abs(difference) > 3) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+function isSafeWithDampener(reportNumbers: number[]): 0 | 1 {
+  // Check if already safe
+  if (isSafe(reportNumbers)) return 1;
+
+  // Try removing each element
+  for (let i = 0; i < reportNumbers.length; i++) {
+    const permutation = reportNumbers.filter((_, index) => index !== i);
+    if (isSafe(permutation)) return 1;
+  }
+
+  return 0; // No safe permutation found
+}
 
 try {
   const lines: string[] = fs
@@ -19,34 +58,7 @@ try {
   let sum = 0;
   for (const line of lines) {
     const reportNumbers: number[] = line.trim().split(/\s+/).map(Number);
-    if (reportNumbers.length < 2) {
-      continue;
-    }
-
-    let anyErrors: boolean = false;
-    let firstDifference = undefined;
-    for (let index = 0; index < reportNumbers.length - 1; index += 1) {
-      const difference = reportNumbers[index + 1] - reportNumbers[index];
-      if (firstDifference === undefined) {
-        firstDifference = difference;
-      }
-
-      if (firstDifference * difference < 0) {
-        anyErrors = true;
-        break;
-      }
-
-      if (Math.abs(difference) < 1 || Math.abs(difference) > 3) {
-        anyErrors = true;
-        break;
-      }
-    }
-
-    if (anyErrors) {
-      continue;
-    }
-
-    sum += 1;
+    sum += isSafeWithDampener(reportNumbers);
   }
 
   console.log(sum);
